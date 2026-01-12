@@ -4,21 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
 
     public String generate(UserDetails userDetails) {
 
@@ -28,12 +29,17 @@ public class JwtService {
                 .toList();
 
         Instant now = Instant.now();
+        var claims = Map.of(
+                "roles", roles,
+                "jti", UUID.randomUUID().toString()
+        );
+
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                 .issuer("issuer")
                 .subject(userDetails.getUsername())
                 .expiresAt(now.plus(Duration.ofHours(24)))
                 .issuedAt(now)
-                .claim("roles", roles)
+                .claims(c -> c.putAll(claims))
                 .build();
 
         JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256)
@@ -43,6 +49,10 @@ public class JwtService {
                 JwtEncoderParameters.from(header, claimsSet)
         ).getTokenValue();
 
+    }
+
+    public Jwt decode(String token) {
+        return jwtDecoder.decode(token);
     }
 
 }
