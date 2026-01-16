@@ -1,8 +1,6 @@
 package com.jesussb.jwt_security_demo.common.auth;
 
-import com.jesussb.jwt_security_demo.common.auth.dto.LoginRequest;
-import com.jesussb.jwt_security_demo.common.auth.dto.LoginResponse;
-import com.jesussb.jwt_security_demo.common.auth.dto.RevokeRequest;
+import com.jesussb.jwt_security_demo.common.auth.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,5 +24,11 @@ public class AuthController {
     public ResponseEntity<RevokeResponse> register(@RequestBody RevokeRequest revokeRequest) {
         return ResponseEntity.ok(authService.revoke(revokeRequest));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
+        return ResponseEntity.ok(authService.refresh(refreshRequest));
+    }
+
 
 }

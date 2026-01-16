@@ -79,12 +79,10 @@ public class SecurityConfig {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            return jwt.getClaimAsStringList("roles")
-                    .stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-        });
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> jwt.getClaimAsStringList("roles")
+                .stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList()));
         return converter;
     }
 
