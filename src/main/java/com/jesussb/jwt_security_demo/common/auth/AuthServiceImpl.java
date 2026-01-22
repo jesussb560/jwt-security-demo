@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -32,6 +33,7 @@ import java.util.HexFormat;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
+    private final Clock clock;
 
     private final JwtService jwtService;
     private final RefreshTokenService  refreshTokenService;
@@ -66,9 +68,11 @@ public class AuthServiceImpl implements AuthService {
         String jti = jwt.getClaimAsString("jti");
         Instant exp = jwt.getExpiresAt();
 
-        Duration duration = Duration.between(Instant.now(), exp);
+        Instant now = clock.instant();
+        Duration duration = Duration.between(now, exp);
+
         if (duration.isNegative() || duration.isZero()) {
-            return new RevokeResponse("ok");
+            return new RevokeResponse("ok (expired)");
         }
 
         jwtStore.revoke(jti, duration);
